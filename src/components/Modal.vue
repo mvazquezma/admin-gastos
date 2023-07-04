@@ -1,13 +1,53 @@
 <script setup>
+import { ref } from 'vue'
+import Alerta from './Alerta.vue'
 import cerrarModal from '../assets/img/cerrar.svg'
 
-const emit = defineEmits(['ocultar-modal'])
+const error = ref('')
+
+const emit = defineEmits(['ocultar-modal', 'guardar-gasto', 'update:nombre', 'update:cantidad', 'update:categoria'])
 const props = defineProps({
     modal: {
         type: Object, 
         required: true
-    }
+    },
+    nombre: {
+        type: String, 
+        required: true
+    },
+    cantidad: {
+        type: [String, Number], 
+        required: true
+    },
+    categoria: {
+        type: String, 
+        required: true
+    },
 })
+
+const agregarGasto = () => {
+    // Validar que no haya campos vacios
+    const {nombre, cantidad, categoria} = props
+
+    if([nombre, cantidad, categoria].includes('')) {
+        error.value = 'Todos los campos son obligatorios'
+        setTimeout(() => {
+            error.value = ''
+        }, 3000)
+        return
+    }
+
+    // Validar la cantidad
+    if(cantidad <= 0) {
+        error.value = 'Cantidad no válida'
+        setTimeout(() => {
+            error.value = ''
+        }, 3000)
+        return
+    }
+
+    emit('guardar-gasto')
+}  
 </script>
 
 <template>
@@ -23,14 +63,22 @@ const props = defineProps({
             class="contenedor contendor-formulario"
             :class="[modal.animar ? 'animar' : 'cerrar']"
         >
-            <form class="nuevo-gasto">
+            <form 
+                class="nuevo-gasto"
+                @submit.prevent="agregarGasto"
+            >
                 <legend>Añadir gasto</legend>
+
+                <Alerta v-if="error">{{ error }}</Alerta>
+
                 <div class="campo">
                     <label for="nombre">Nombre gasto:</label>
                     <input 
                         type="text"
-                         id="nombre"
-                         placeholder="Añade el nombre del gasto"   
+                        id="nombre"
+                        placeholder="Añade el nombre del gasto"
+                        :value="nombre"
+                        @input="$emit('update:nombre', $event.target.value)"
                     >
                 </div>
 
@@ -39,13 +87,19 @@ const props = defineProps({
                     <input 
                         type="text"
                          id="cantidad"
-                         placeholder="Añade ls cantidad del gasto, ej. 300"   
+                         placeholder="Añade ls cantidad del gasto, ej. 300"  
+                         :value="cantidad"
+                         @input="$emit('update:cantidad', +$event.target.value)" 
                     >
                 </div>
 
                 <div class="campo">
                     <label for="categoria">Categoria:</label>
-                    <select id="categoria">
+                    <select
+                        id="categoria"
+                        :value="categoria"
+                        @input="$emit('update:categoria', $event.target.value)"
+                    >
                         <option value="">-- Seleccione --</option>
                         <option value="ahorro">Ahorro</option>
                         <option value="comida">Comida</option>
