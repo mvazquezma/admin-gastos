@@ -5,7 +5,7 @@ import cerrarModal from '../assets/img/cerrar.svg'
 
 const error = ref('')
 
-const emit = defineEmits(['ocultar-modal', 'guardar-gasto', 'update:nombre', 'update:cantidad', 'update:categoria'])
+const emit = defineEmits(['ocultar-modal', 'guardar-gasto', 'update:nombre', 'update:cantidad', 'update:categoria', 'eliminar-gasto'])
 const props = defineProps({
     modal: {
         type: Object, 
@@ -149,6 +149,13 @@ const isEditing = computed(() => {
                     :value="[isEditing ? 'Guardar cambios' : 'Añadir gasto']"
                 >
             </form>
+
+            <button
+                type="button"
+                class="btn-eliminar"
+                v-if="isEditing"
+                @click="$emit('eliminar-gasto')"
+            >Eliminar gasto</button>
         </div>
     </div>
 </template>
@@ -171,7 +178,6 @@ const isEditing = computed(() => {
         width: 3rem;
         cursor: pointer;
     }
-
     .contenedor-formulario {
         transition-property: all;
         transition-duration: 300ms;
